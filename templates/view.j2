@@ -33,7 +33,11 @@
   {% endif %}
   {% if post.link %}
     <div class="box">
-      <a href="{{ post.link.url }}">{{ post.link.title }}</a>
+      {% set target = post.link.url %}
+      {% if target.startswith("events/") %}
+        {% set target = "https://plus.google.com/" + target %}
+      {% endif %}
+      <a href="{{ target }}">{{ post.link.title }}</a>
       <br>
       {{ post.link.description or "" }}
     </div>
@@ -92,7 +96,11 @@
               {%- elif segment[0] == 3 -%}
                 <a href="{{ profile_link }}{{ segment[2] }}">{{ format("+" + segment[1], segment[-1]) }}</a>
               {%- elif segment[0] in [2, 4] -%}
-                <a href="{{ segment[2] }}">{{ format(segment[1], segment[-1]) }}</a>
+                {%- set target = segment[2] -%}
+                {%- if target.startswith("events/") -%}
+                  {%- set target = "https://plus.google.com/" + target -%}
+                {%- endif -%}
+                <a href="{{ target }}">{{ format(segment[1], segment[-1]) }}</a>
               {%- endif -%}
             {%- endfor %}
           {% endif %}
