@@ -18,7 +18,29 @@
   </a>
 {% endmacro %}
 
-{% macro render(post) %}
+{% macro attachments(post) %}
+  {% if post.image %}
+    <p>
+      {{ thumb(post.image) }}
+    </p>
+  {% endif %}
+  {% if post.images %}
+    <p>
+      {% for image in post.images %}
+        {{ thumb(image) }}
+      {% endfor %}
+    </p>
+  {% endif %}
+  {% if post.link %}
+    <div class="box">
+      <a href="{{ post.link.url }}">{{ post.link.title }}</a>
+      <br>
+      {{ post.link.description or "" }}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro render(post, parent=None) %}
   <article class="media">
     <figure class="media-left">
       <p class="image is-64x64">
@@ -58,27 +80,12 @@
         </p>
         {% if post.reshare %}
           <div class="box">
-            {{ render(post.reshare) }}
+            {{ render(post.reshare, post) }}
           </div>
-        {% endif %}
-        {% if post.link %}
-          <div class="box">
-            <a href="{{ post.link.url }}">{{ post.link.title }}</a>
-            <br>
-            {{ post.link.description or "" }}
-          </div>
-        {% endif %}
-        {% if post.image %}
-          <p>
-            {{ thumb(post.image) }}
-          </p>
-        {% endif %}
-        {% if post.images %}
-          <p>
-            {% for image in post.images %}
-              {{ thumb(image) }}
-            {% endfor %}
-          </p>
+        {% elif parent %}
+          {{ attachments(parent) }}
+        {% else %}
+          {{ attachments(post) }}
         {% endif %}
       </div>
       {% for reply in post.comments %}
