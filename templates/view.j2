@@ -13,21 +13,21 @@
 {% endmacro %}
 
 {% macro thumb(image) %}
-  <a href="{{ image.proxy }}">
-    <img src="{{ image.proxy.replace("/s0/", "/s400-c/") }}" style="width: 200px;">
+  <a href="{{ image }}">
+    <img src="{{ image.replace("/s0/", "/s400-c/") }}" style="width: 200px;">
   </a>
 {% endmacro %}
 
 {% macro attachments(post) %}
   {% if post.image %}
     <p>
-      {{ thumb(post.image) }}
+      {{ thumb(post.image.proxy) }}
     </p>
   {% endif %}
   {% if post.images %}
     <p>
       {% for image in post.images %}
-        {{ thumb(image) }}
+        {{ thumb(image.proxy) }}
       {% endfor %}
     </p>
   {% endif %}
@@ -63,20 +63,26 @@
           {% endif %}
         </p>
         <p>
-          {% for line in post.message %}
-            {% if line[0] == 0 %}
-              {% if line[1].startswith("Originally shared by ") and post.reshare %}
-                {% break %}
+          {% if post.message|length == 1 and post.message[0][0] == 2 and
+                ".googleusercontent.com/" in post.message[0][1] and
+                post.message[0][2].startswith("https://plus.google.com/photos/") %}
+            {{ thumb(post.message[0][1]) }}
+          {% else %}
+            {% for line in post.message %}
+              {% if line[0] == 0 %}
+                {% if line[1].startswith("Originally shared by ") and post.reshare %}
+                  {% break %}
+                {% endif %}
+                {{ format(line[1], line[-1]) }}
+              {% elif line[0] == 1 %}
+                <br>
+              {% elif line[0] == 3 %}
+                <a href="{{ profile_link }}{{ line[2] }}">{{ format("+" + line[1], line[-1]) }}</a>
+              {% elif line[0] in [2, 4] %}
+                <a href="{{ line[2] }}">{{ format(line[1], line[-1]) }}</a>
               {% endif %}
-              {{ format(line[1], line[-1]) }}
-            {% elif line[0] == 1 %}
-              <br>
-            {% elif line[0] == 3 %}
-              <a href="{{ profile_link }}{{ line[2] }}">{{ format("+" + line[1], line[-1]) }}</a>
-            {% elif line[0] in [2, 4] %}
-              <a href="{{ line[2] }}">{{ format(line[1], line[-1]) }}</a>
-            {% endif %}
-          {% endfor %}
+            {% endfor %}
+          {% endif %}
         </p>
         {% if post.reshare %}
           <div class="box">
