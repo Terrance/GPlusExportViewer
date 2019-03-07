@@ -109,13 +109,14 @@
     {% for comm in acc.communities %}
       <h1 class="title">{{ comm.name }}</h1>
       <p class="subtitle">{{ comm.tagline }}</p>
+      {% set posts = [] %}
       {% for cat in comm.categories %}
-        <h2 class="title">{{ cat.name }}</h2>
-        {% for post in cat.posts|sort(attribute="createdAt") %}
-          <div class="box">
-            {{ render(post) }}
-          </div>
-        {% endfor %}
+        {% do posts.extend(cat.posts) %}
+      {% endfor %}
+      {% for post in posts|sort(attribute="createdAt", reverse=true) %}
+        <div class="box">
+          {{ render(post) }}
+        </div>
       {% endfor %}
     {% endfor %}
   {% endfor %}
