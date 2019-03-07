@@ -54,15 +54,17 @@
             {% if parent %}Originally posted by{% endif %}
             <a href="{{ profile_link }}{{ post.author.id }}">{{ post.author.name }}</a>
           </strong>
-          <small>{{ post.createdAt }}</small>
+          {% if post.community and post.community.stream %}
+            &#x25b8; {{ post.community.stream.name }}
+          {% endif %}
+          {% if post.createdAt %}
+            &middot; {{ post.createdAt }}
+          {% endif %}
           {% if "isPublic" in post %}
-            {% if post.publicId %}
-              <a href="{{ profile_link }}{{ post.publicId[0] }}/posts/{{ post.publicId[1] }}">
-            {% endif %}
-            {{ "Public" if post.isPublic else "Private" }}
-            {% if post.publicId %}
-              </a>
-            {% endif %}
+            &middot; {% if post.isPublic %}Public{% else %}Private{% endif %}
+          {% endif %}
+          {% if post.publicId %}
+            &middot; <a href="{{ profile_link }}{{ post.publicId[0] }}/posts/{{ post.publicId[1] }}">Original</a>
           {% endif %}
         </p>
         <p>
