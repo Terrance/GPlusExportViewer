@@ -3,10 +3,16 @@
 {% block title %}Google+ exports{% endblock %}
 
 {% block main %}
-  <h1 class="title">Google+ exports</h1>
-  <ul>
-    {% for name in names %}
-      <li><a href="{{ url_for("view", name=name) }}">{{ name }}</a> <small><a href="{{ url_for("raw", name=name) }}">raw</a></small></li>
-    {% endfor %}
-  </ul>
+  {% call section("danger") %}
+    <h1 class="title">Google+ exports</h1>
+  {% endcall %}
+  {% call section() %}
+    <div class="content">
+      <ul>
+        {% for name in names %}
+          <li><a href="{{ url_for("view", name=name) }}">{{ name }}</a> <small><a href="{{ url_for("raw", name=name) }}">raw</a></small></li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endcall %}
 {% endblock %}
