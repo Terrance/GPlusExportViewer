@@ -1,0 +1,12 @@
+{% extends "_base.j2" %}
+
+{% block title %}Google+ exports{% endblock %}
+
+{% block main %}
+  <h1 class="title">Google+ exports</h1>
+  <ul>
+    {% for name in names %}
+      <li><a href="{{ url_for("view", name=name) }}">{{ name }}</a> <small><a href="{{ url_for("raw", name=name) }}">raw</a></small></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

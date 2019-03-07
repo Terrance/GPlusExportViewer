@@ -1,0 +1,109 @@
+{% extends "_base.j2" %}
+
+{% set profile_link = "https://plus.google.com/" %}
+
+{% macro format(text, formats) %}
+  {% if formats.bold %}<b>{% endif %}
+  {% if formats.italic %}<i>{% endif %}
+  {% if formats.strikethrough %}<del>{% endif %}
+  {{ text }}
+  {% if formats.strikethrough %}</del>{% endif %}
+  {% if formats.italic %}</i>{% endif %}
+  {% if formats.bold %}</b>{% endif %}
+{% endmacro %}
+
+{% macro thumb(image) %}
+  <a href="{{ image.proxy }}">
+    <img src="{{ image.proxy.replace("/s0/", "/s400-c/") }}" style="width: 200px;">
+  </a>
+{% endmacro %}
+
+{% macro render(post) %}
+  <article class="media">
+    <figure class="media-left">
+      <p class="image is-64x64">
+        <img src="{{ post.author.image }}">
+      </p>
+    </figure>
+    <div class="media-content">
+      <div class="content">
+        <p>
+          <a href="{{ profile_link }}{{ post.author.id }}"><strong>{{ post.author.name }}</strong></a>
+          <small>{{ post.createdAt }}</small>
+          {% if "isPublic" in post %}
+            {% if post.publicId %}
+              <a href="{{ profile_link }}{{ post.publicId[0] }}/posts/{{ post.publicId[1] }}">
+            {% endif %}
+            {{ "Public" if post.isPublic else "Private" }}
+            {% if post.publicId %}
+              </a>
+            {% endif %}
+          {% endif %}
+        </p>
+        <p>
+          {% for line in post.message %}
+            {% if line[0] == 0 %}
+              {% if line[1].startswith("Originally shared by ") and post.reshare %}
+                {% break %}
+              {% endif %}
+              {{ format(line[1], line[-1]) }}
+            {% elif line[0] == 1 %}
+              <br>
+            {% elif line[0] == 3 %}
+              <a href="{{ profile_link }}{{ line[2] }}">{{ format("+" + line[1], line[-1]) }}</a>
+            {% elif line[0] in [2, 4] %}
+              <a href="{{ line[2] }}">{{ format(line[1], line[-1]) }}</a>
+            {% endif %}
+          {% endfor %}
+        </p>
+        {% if post.reshare %}
+          <div class="box">
+            {{ render(post.reshare) }}
+          </div>
+        {% endif %}
+        {% if post.link %}
+          <div class="box">
+            <a href="{{ post.link.url }}">{{ post.link.title }}</a>
+            <br>
+            {{ post.link.description or "" }}
+          </div>
+        {% endif %}
+        {% if post.image %}
+          <p>
+            {{ thumb(post.image) }}
+          </p>
+        {% endif %}
+        {% if post.images %}
+          <p>
+            {% for image in post.images %}
+              {{ thumb(image) }}
+            {% endfor %}
+          </p>
+        {% endif %}
+      </div>
+      {% for reply in post.comments %}
+        {{ render(reply) }}
+      {% endfor %}
+    </div>
+  </article>
+{% endmacro %}
+
+{% block title %}Google+ export{% endblock %}
+
+{% block main %}
+  {% for acc in content.accounts %}
+    <p>Exported by: {{ acc.name }}</p>
+    {% for comm in acc.communities %}
+      <h1 class="title">{{ comm.name }}</h1>
+      <p class="subtitle">{{ comm.tagline }}</p>
+      {% for cat in comm.categories %}
+        <h2 class="title">{{ cat.name }}</h2>
+        {% for post in cat.posts|sort(attribute="createdAt") %}
+          <div class="box">
+            {{ render(post) }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+{% endblock %}

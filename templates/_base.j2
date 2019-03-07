@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}i{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css"
+      integrity="sha256-8B1OaG0zT7uYA572S2xOxWACq9NXYPQ+U5kHPV1bJN4=" crossorigin="anonymous">
+    <style>
+      .media .box > .media {
+        border-top: none;
+        padding-top: 0;
+      }
+      .media .box > .media figure {
+        margin-left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="section">
+      <div class="container">
+        {% block main %}{% endblock %}
+      </div>
+    </section>
+  </body>
+</html>
