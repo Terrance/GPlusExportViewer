@@ -3,13 +3,13 @@
 {% set profile_link = "https://plus.google.com/" %}
 
 {% macro format(text, formats) %}
-  {% if formats.bold %}<b>{% endif %}
-  {% if formats.italic %}<i>{% endif %}
-  {% if formats.strikethrough %}<del>{% endif %}
+  {%- if formats.bold %}<b>{% endif -%}
+  {%- if formats.italic %}<i>{% endif -%}
+  {%- if formats.strikethrough %}<del>{% endif -%}
   {{ text }}
-  {% if formats.strikethrough %}</del>{% endif %}
-  {% if formats.italic %}</i>{% endif %}
-  {% if formats.bold %}</b>{% endif %}
+  {%- if formats.strikethrough %}</del>{% endif -%}
+  {%- if formats.italic %}</i>{% endif -%}
+  {%- if formats.bold %}</b>{% endif -%}
 {% endmacro %}
 
 {% macro thumb(image) %}
@@ -68,20 +68,20 @@
                 post.message[0][2].startswith("https://plus.google.com/photos/") %}
             {{ thumb(post.message[0][1]) }}
           {% else %}
-            {% for line in post.message %}
-              {% if line[0] == 0 %}
-                {% if line[1].startswith("Originally shared by ") and post.reshare %}
+            {% for line in post.message -%}
+              {%- if line[0] == 0 -%}
+                {%- if line[1].startswith("Originally shared by ") and post.reshare %}
                   {% break %}
-                {% endif %}
-                {{ format(line[1], line[-1]) }}
-              {% elif line[0] == 1 %}
+                {% endif -%}
+                {{- format(line[1], line[-1]) -}}
+              {%- elif line[0] == 1 -%}
                 <br>
-              {% elif line[0] == 3 %}
+              {%- elif line[0] == 3 -%}
                 <a href="{{ profile_link }}{{ line[2] }}">{{ format("+" + line[1], line[-1]) }}</a>
-              {% elif line[0] in [2, 4] %}
+              {%- elif line[0] in [2, 4] -%}
                 <a href="{{ line[2] }}">{{ format(line[1], line[-1]) }}</a>
-              {% endif %}
-            {% endfor %}
+              {%- endif -%}
+            {%- endfor %}
           {% endif %}
         </p>
         {% if post.reshare %}
