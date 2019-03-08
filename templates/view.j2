@@ -79,9 +79,10 @@
             &middot; <a href="{{ profile_link }}{{ post.publicId[0] }}/posts/{{ post.publicId[1] }}">Original</a>
           {% endif %}
         </p>
-        {% set images = (parent or post).images or [] %}
-        {% if post.image %}
-          {% do images.append(post.image) %}
+        {% set outer = parent or post %}
+        {% set images = outer.images or [] %}
+        {% if outer.image %}
+          {% do images.append(outer.image) %}
         {% endif %}
         {% set segments = post.message %}
         {% if post.reshare %}
