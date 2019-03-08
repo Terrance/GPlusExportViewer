@@ -6,7 +6,7 @@
   {%- if formats.bold %}<b>{% endif -%}
   {%- if formats.italic %}<i>{% endif -%}
   {%- if formats.strikethrough %}<del>{% endif -%}
-  {{ text }}
+  {{ text|escape }}
   {%- if formats.strikethrough %}</del>{% endif -%}
   {%- if formats.italic %}</i>{% endif -%}
   {%- if formats.bold %}</b>{% endif -%}
