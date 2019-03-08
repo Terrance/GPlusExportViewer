@@ -13,33 +13,35 @@
 {% endmacro %}
 
 {% macro thumb(image) %}
+  {% if "/s0/" in image %}
+    {% set small = image.replace("/s0/", "/s400-c/") %}
+  {% elif image.endswith("=s0") %}
+    {% set small = image[:-3] + "=s400-c" %}
+  {% else %}
+    {% set small = image %}
+  {% endif %}
   <a href="{{ image }}">
-    <img src="{{ image.replace("/s0/", "/s400-c/") }}" style="width: 200px;">
+    <img src="{{ small }}" style="width: 200px; height: 200px;">
   </a>
 {% endmacro %}
 
-{% macro attachments(post) %}
-  {% if post.image %}
+{% macro attachments(images, link) %}
+  {% if images %}
     <p>
-      {{ thumb(post.image.proxy) }}
-    </p>
-  {% endif %}
-  {% if post.images %}
-    <p>
-      {% for image in post.images %}
+      {% for image in images %}
         {{ thumb(image.proxy) }}
       {% endfor %}
     </p>
   {% endif %}
-  {% if post.link %}
+  {% if link %}
     <div class="box">
-      {% set target = post.link.url %}
+      {% set target = link.url %}
       {% if target.startswith("events/") %}
         {% set target = "https://plus.google.com/" + target %}
       {% endif %}
-      <a href="{{ target }}">{{ post.link.title }}</a>
+      <a href="{{ target }}">{{ link.title }}</a>
       <br>
-      {{ post.link.description or "" }}
+      {{ link.description or "" }}
     </div>
   {% endif %}
 {% endmacro %}
@@ -58,7 +60,7 @@
         <p>
           <strong>
             {% if parent %}
-              Originally posted by
+              Originally shared by
             {% endif %}
             {% if post.author.id %}
               <a href="{{ profile_link }}{{ post.author.id }}">{{ post.author.name }}</a>
@@ -79,30 +81,30 @@
             &middot; <a href="{{ profile_link }}{{ post.publicId[0] }}/posts/{{ post.publicId[1] }}">Original</a>
           {% endif %}
         </p>
-        <p>
-          {% if post.message|length == 1 and post.message[0][0] == 2 and
-                ".googleusercontent.com/" in post.message[0][1] and
-                post.message[0][2].startswith("https://plus.google.com/photos/") %}
-            {{ thumb(post.message[0][1]) }}
+        {% set images = (parent or post).images or [] %}
+        {% if post.image %}
+          {% do images.append(post.image) %}
+        {% endif %}
+        {% set segments = post.message %}
+        {% if post.reshare %}
+          {% if segments|length == post.reshare.message|length + 3 %}
+            {% set segments = [] %}
           {% else %}
-            {% set ns = namespace(segments=post.message) %}
-            {% for segment in post.message %}
-              {% if segment[0] == 0 and segment[1].startswith("Originally shared by ") and post.reshare %}
-                {% if loop.index == 1 %}
-                  {% set ns.segments = [] %}
-                {% else %}
-                  {% set ns.segments = post.message[:loop.index - 2] %}
-                {% endif %}
-                {% break %}
-              {% endif %}
-            {% endfor %}
-            {% for segment in ns.segments -%}
+            {% set segments = segments[:-(segments|length - 2)] %}
+          {% endif %}
+        {% endif %}
+        {% if segments %}
+          <p>
+            {% for segment in segments -%}
               {%- if segment[0] == 0 -%}
                 {{ format(segment[1], segment[-1]) }}
               {%- elif segment[0] == 1 -%}
                 <br>
               {%- elif segment[0] == 3 -%}
                 <a href="{{ profile_link }}{{ segment[2] }}">{{ format("+" + segment[1], segment[-1]) }}</a>
+              {%- elif segment[0] == 2 and ".googleusercontent.com/" in segment[1] and segment[2].startswith("https://plus.google.com/photos/") -%}
+                {%- do images.append({"proxy": segment[1]}) -%}
+                {%- continue -%}
               {%- elif segment[0] in [2, 4] -%}
                 {%- set target = segment[2] -%}
                 {%- if target.startswith("events/") -%}
@@ -111,16 +113,16 @@
                 <a href="{{ target }}">{{ format(segment[1], segment[-1]) }}</a>
               {%- endif -%}
             {%- endfor %}
-          {% endif %}
-        </p>
+          </p>
+        {% endif %}
         {% if post.reshare %}
           <div class="box">
             {{ render(post.reshare, post) }}
           </div>
         {% elif parent %}
-          {{ attachments(parent) }}
+          {{ attachments(images, parent.link) }}
         {% else %}
-          {{ attachments(post) }}
+          {{ attachments(images, post.link) }}
         {% endif %}
       </div>
       {% for reply in post.comments %}
