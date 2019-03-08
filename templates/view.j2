@@ -134,16 +134,45 @@
 
 {% block main %}
   {% for acc in content.accounts %}
+    {% if acc.posts %}
+      {% call section("danger") %}
+        <h1 class="title">{{ acc.name }}</h1>
+      {% endcall %}
+      {% call section() %}
+        {% for post in acc.posts|sort(attribute="createdAt", reverse=true) %}
+          <div class="box">
+            {{ render(post) }}
+          </div>
+        {% endfor %}
+      {% endcall %}
+    {% endif %}
+    {% for coll in acc.collections %}
+      {% if coll.posts %}
+        {% call section("info") %}
+          <h1 class="title">{{ coll.name }}</h1>
+        {% endcall %}
+        {% call section() %}
+          {% for post in coll.posts|sort(attribute="createdAt", reverse=true) %}
+            <div class="box">
+              {{ render(post) }}
+            </div>
+          {% endfor %}
+        {% endcall %}
+      {% endif %}
+    {% endfor %}
     {% for comm in acc.communities %}
+      {% set posts = [] %}
+      {% for cat in comm.categories %}
+        {% do posts.extend(cat.posts) %}
+      {% endfor %}
+      {% if not posts %}
+        {% continue %}
+      {% endif %}
       {% call section("success") %}
         <h1 class="title">{{ comm.name }}</h1>
         <h2 class="subtitle">{{ comm.tagline }}</h2>
       {% endcall %}
       {% call section() %}
-        {% set posts = [] %}
-        {% for cat in comm.categories %}
-          {% do posts.extend(cat.posts) %}
-        {% endfor %}
         {% for post in posts|sort(attribute="createdAt", reverse=true) %}
           <div class="box">
             {{ render(post) }}
