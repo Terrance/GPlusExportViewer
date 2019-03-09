@@ -1,17 +1,3 @@
-{%- macro section(hero=none) %}
-  <section{% if hero %} class="hero is-{{ hero }}"{% endif %}>
-    {% if hero %}
-      <div class="hero-body">
-    {% endif %}
-    <div class="container">
-      {{ caller() }}
-    </div>
-    {% if hero %}
-      </div>
-    {% endif %}
-  </section>
-{% endmacro -%}
-
 <!DOCTYPE html>
 <html>
   <head>
