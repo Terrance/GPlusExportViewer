@@ -31,7 +31,7 @@ def index():
 
 @app.route("/view/<name>")
 def view(name):
-    return render_template("view.j2", content=content(name))
+    return render_template("view.j2", name=name, content=content(name))
 
 
 @app.route("/raw/<name>")
