@@ -8,6 +8,7 @@ from flask import Flask, abort, jsonify, render_template
 
 
 app = Flask(__name__)
+
 app.jinja_env.add_extension("jinja2.ext.do")
 app.jinja_env.add_extension("jinja2.ext.loopcontrols")
 
@@ -26,7 +27,7 @@ def content(name):
 
 @app.route("/")
 def index():
-    return render_template("index.j2", names=names())
+    return render_template("viewer.j2", names=names())
 
 
 @app.route("/view/<name>")
