@@ -1,0 +1,33 @@
+{% extends "_base.j2" %}
+{% from "_macros.j2" import section, render %}
+
+
+{% block title %}Google+ proxy{% endblock %}
+
+{% block main %}
+  {% call section("danger") %}
+    <h1 class="title">Google+ proxy</h1>
+  {% endcall %}
+  {% call section() %}
+    <div class="content">
+      <p>This site will serve cached Google+ posts using the same URLs as Google+ itself:</p>
+      <ul>
+        <li>Users:
+          <ul>
+            <li><code>/&lt;uid&gt;</code></li>
+            <li><code>/&lt;uid&gt;/posts/&lt;pid&gt;</code></li>
+            <li><code>/+&lt;alias&gt;</code></li>
+            <li><code>/+&lt;alias&gt;/posts/&lt;pid&gt;</code></li>
+          </ul>
+        </li>
+        <li>Communities:
+          <ul>
+            <li><code>/communities/&lt;cid&gt;</code></li>
+            <li><code>/communities/&lt;cid&gt;/stream/&lt;sid&gt;</code></li>
+            <li><code>/communities/&lt;cid&gt;/posts/&lt;pid&gt;</code></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  {% endcall %}
+{% endblock %}

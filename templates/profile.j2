@@ -1,0 +1,18 @@
+{% extends "_base.j2" %}
+{% from "_macros.j2" import section, render %}
+
+
+{% block title %}{{ user.name }}{% endblock %}
+
+{% block main %}
+  {% call section("danger") %}
+    <h1 class="title">{{ user.name }}</h1>
+  {% endcall %}
+  {% call section() %}
+    {% for post in posts|sort(attribute="createdAt", reverse=true) %}
+      <div class="box">
+        {{ render(post, root="") }}
+      </div>
+    {% endfor %}
+  {% endcall %}
+{% endblock %}

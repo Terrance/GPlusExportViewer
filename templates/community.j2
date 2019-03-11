@@ -1,0 +1,21 @@
+{% extends "_base.j2" %}
+{% from "_macros.j2" import section, render %}
+
+
+{% block title %}{{ comm.name }}{% endblock %}
+
+{% block main %}
+  {% call section("success") %}
+    <h1 class="title">{{ comm.name }}</h1>
+    {% if comm.tagline %}
+      <p class="subtitle">{{ comm.tagline }}</p>
+    {% endif %}
+  {% endcall %}
+  {% call section() %}
+    {% for post in posts|sort(attribute="createdAt", reverse=true) %}
+      <div class="box">
+        {{ render(post, root="") }}
+      </div>
+    {% endfor %}
+  {% endcall %}
+{% endblock %}
