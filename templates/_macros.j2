@@ -74,6 +74,9 @@
           {% if post.publicId %}
             &middot; <a href="{{ root }}/{{ post.publicId[0] }}/posts/{{ post.publicId[1] }}">Original</a>
           {% endif %}
+          {% if post.plusses %}
+            &middot; +{{ post.plusses }}
+          {% endif %}
         </p>
         {% set outer = parent or post %}
         {% set images = outer.images or [] %}
