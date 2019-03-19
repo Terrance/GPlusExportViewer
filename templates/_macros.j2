@@ -21,13 +21,18 @@
   </a>
 {% endmacro %}
 
-{% macro attachments(images, link) %}
+{% macro attachments(images, video, link) %}
   {% if images %}
     <p>
       {% for image in images %}
         {{ thumb(image.proxy) }}
       {% endfor %}
     </p>
+  {% endif %}
+  {% if video %}
+    <video controls width="200" height="200">
+      <source src="{{ video }}">
+    </video>
   {% endif %}
   {% if link %}
     <div class="box">
@@ -118,9 +123,9 @@
             {{ render(post.reshare, post, root) }}
           </div>
         {% elif parent %}
-          {{ attachments(images, parent.link) }}
+          {{ attachments(images, parent.video, parent.link) }}
         {% else %}
-          {{ attachments(images, post.link) }}
+          {{ attachments(images, post.video, post.link) }}
         {% endif %}
       </div>
       {% for reply in post.comments %}
