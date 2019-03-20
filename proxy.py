@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from collections import defaultdict
 from glob import glob
 import json
 import os
@@ -14,49 +15,49 @@ app.jinja_env.add_extension("jinja2.ext.loopcontrols")
 
 
 def load():
+    app.logger.debug("Starting data load")
     loaded = json.load(open(os.getenv("GPEV_DATA")))
-    data = {"communities": {}, "streams": {}, "users": {}, "aliases": {}, "posts": {}}
+    data = {"users": {},
+            "aliases": {},
+            "collections": {},
+            "communities": {},
+            "streams": defaultdict(dict),
+            "posts": defaultdict(dict)}
 
-    def _add_post(post):
+    def _add_post(post, *keys):
         uid = post["author"]["id"]
         if uid not in data["users"]:
             data["users"][uid] = dict(post["author"], type="PROFILE")
-        if uid not in data["posts"]:
-            data["posts"][uid] = {}
-        if post.get("community"):
-            cid = post["community"]["id"]
-            if cid not in data["posts"]:
-                data["posts"][cid] = {}
-            if post["community"].get("stream"):
-                sid = post["community"]["stream"]["id"]
-                if sid not in data["posts"]:
-                    data["posts"][sid] = {}
         if len(post["publicId"]) == 2:
             alias, pid = post["publicId"]
             if alias != uid:
                 data["aliases"][alias[1:]] = uid
             data["posts"][uid][pid] = post
-            if post.get("community"):
-                data["posts"][cid][pid] = post
-                if post["community"].get("stream"):
-                    data["posts"][sid][pid] = post
+            for key in keys:
+                data["posts"][key][pid] = post
         elif len(post["publicId"]) == 1 and post["publicId"][0].startswith("events/"):
             pass  # TODO
         else:
             raise ValueError(post)
 
     for acc in loaded["accounts"]:
+        app.logger.debug("Account: %s", acc["id"])
         data["users"][acc["id"]] = {k: acc[k] for k in ("id", "name", "image", "type")}
-        data["posts"][acc["id"]] = {}
         for post in acc["posts"]:
             _add_post(post)
+        for coll in acc["collections"]:
+            app.logger.debug("Collection: %s", coll["id"])
+            data["collections"][coll["id"]] = {k: coll[k] for k in ("id", "name", "image", "type")}
+            for post in coll["posts"]:
+                _add_post(post, coll["id"])
+                data["posts"][coll["id"]][post["publicId"][1]] = post
         for comm in acc["communities"]:
+            app.logger.debug("Community: %s", comm["id"])
             data["communities"][comm["id"]] = {k: comm[k] for k in ("id", "name", "image", "tagline")}
-            data["streams"][comm["id"]] = {}
             for cat in comm["categories"]:
                 data["streams"][comm["id"]][cat["id"]] = {k: cat[k] for k in ("id", "name")}
                 for post in cat["posts"]:
-                    _add_post(post)
+                    _add_post(post, comm["id"], cat["id"])
 
     return data
 
@@ -79,6 +80,16 @@ def profile(uid):
     except KeyError:
         abort(404)
     return render_template("profile.j2", user=user, posts=posts.values())
+
+
+@app.route("/collection/<cid>")
+def collection(cid):
+    try:
+        coll = data["collections"][cid]
+        posts = data["posts"][cid]
+    except KeyError:
+        abort(404)
+    return render_template("collection.j2", coll=coll, posts=posts.values())
 
 
 @app.route("/<uid>/posts/<pid>")
